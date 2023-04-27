@@ -19,7 +19,6 @@ refs.loadBtn.classList.add('hidden');
 function handleSearchForm(e) {
   e.preventDefault();
   clearContainer();
-  refs.loadBtn.classList.add('hidden');
   pixabayApi.searchQuery = e.currentTarget.elements.searchQuery.value;
 
   if (pixabayApi.searchQuery === '') {
@@ -30,11 +29,8 @@ function handleSearchForm(e) {
 
   pixabayApi.resetPage();
 
-  pixabayApi.axiosArticales().then(data => {
-    renderGallery(data);
-    refs.loadBtn.classList.remove('hidden');
-  });
-  //   refs.loadBtn.classList.remove('hidden');
+  pixabayApi.axiosArticales().then(renderGallery);
+  refs.loadBtn.classList.remove('hidden');
 }
 
 function handleLoadMoreBtn() {
@@ -45,13 +41,14 @@ function renderGallery(data) {
   try {
     const allPages = Math.ceil(data.totalHits / pixabayApi.per_page);
     const markupGallery = createGalleryCard(data.hits);
+
     pixabayApi.incrementPage();
+
     if (data.totalHits === 0) {
       refs.loadBtn.classList.add('hidden');
       Notify.failure(
         `Sorry, there are no images matching your search query. Please try again.`
       );
-      refs.loadBtn.classList.add('hidden');
     } else if (pixabayApi.page > allPages && data.hits.length < 40) {
       refs.loadBtn.classList.add('hidden');
       Notify.info(`Hooray! We found ${data.totalHits} images.`);
@@ -60,8 +57,6 @@ function renderGallery(data) {
       clearContainer();
     } else if (pixabayApi.page - 1 === 1 && data.hits.length > 1) {
       Notify.info(`Hooray! We found ${data.totalHits} images.`);
-    } else {
-      refs.loadBtn.classList.remove('hidden');
     }
 
     refs.gallery.insertAdjacentHTML('beforeend', markupGallery);
