@@ -16,7 +16,7 @@ refs.form.addEventListener('submit', handleSearchForm);
 refs.loadBtn.addEventListener('click', handleLoadMoreBtn);
 refs.loadBtn.classList.add('hidden');
 
-function handleSearchForm(e) {
+async function handleSearchForm(e) {
   e.preventDefault();
   clearContainer();
   pixabayApi.searchQuery = e.currentTarget.elements.searchQuery.value;
@@ -29,12 +29,26 @@ function handleSearchForm(e) {
 
   pixabayApi.resetPage();
 
-  pixabayApi.axiosArticales().then(renderGallery);
-  refs.loadBtn.classList.remove('hidden');
+  try {
+    const data = await pixabayApi.axiosArticales();
+    renderGallery(data);
+    refs.loadBtn.classList.remove('hidden');
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-function handleLoadMoreBtn() {
-  pixabayApi.axiosArticales().then(renderGallery);
+async function handleLoadMoreBtn() {
+  try {
+    const data = await pixabayApi.axiosArticales();
+    renderGallery(data);
+  } catch (error) {
+    console.log(error);
+  }
+  if (pixabayApi.page * pixabayApi.per_page >= 500) {
+    refs.loadBtn.classList.add('hidden');
+    Notify.info(`We're sorry, but you've reached the end of search results.`);
+  }
 }
 
 function renderGallery(data) {
@@ -52,7 +66,6 @@ function renderGallery(data) {
     } else if (pixabayApi.page > allPages && data.hits.length < 40) {
       refs.loadBtn.classList.add('hidden');
       Notify.info(`Hooray! We found ${data.totalHits} images.`);
-      Notify.info(`We're sorry, but you've reached the end of search results.`);
 
       clearContainer();
     } else if (pixabayApi.page - 1 === 1 && data.hits.length > 1) {
