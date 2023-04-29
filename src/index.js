@@ -32,7 +32,12 @@ async function handleSearchForm(e) {
   try {
     const data = await pixabayApi.axiosArticales();
     renderGallery(data);
-    refs.loadBtn.classList.remove('hidden');
+
+    if (data.totalHits <= pixabayApi.per_page) {
+      refs.loadBtn.classList.add('hidden');
+    } else {
+      refs.loadBtn.classList.remove('hidden');
+    }
   } catch (error) {
     console.log(error);
   }
